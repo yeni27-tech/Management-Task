@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengelola Tugas SMK</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a90e2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --text-color: #2c3e50;
+            --card-bg: #ffffff;
+            --primary-color: #4a90e2;
+            --secondary-color: #e74c3c;
+            --accent-color: #f1c40f;
+            --border: 1px solid #d1d9e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --input-bg: #f9fafc;
+        }
+
+        body.dark {
+            --bg-color: #1e2a38;
+            --text-color: #d1d9e0;
+            --card-bg: #2c3e50;
+            --primary-color: #74b9ff;
+            --secondary-color: #ff7675;
+            --accent-color: #ffeaa7;
+            --border: 1px solid #3b4a5a;
+            --input-bg: #34495e;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: var(--card-bg);
+            border-bottom: var(--border);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .header-title:hover {
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .header-title:hover::before,
+        .header-title:hover::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .header-title:hover::before {
+            color: var(--secondary-color);
+            animation: glitch 1s linear infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+        }
+
+        .header-title:hover::after {
+            color: var(--accent-color);
+            animation: glitch 0.7s linear infinite;
+            clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+        }
+
+        @keyframes glitch {
+            2% {
+                transform: translate(2px, -2px);
+            }
+
+            4% {
+                transform: translate(-2px, 2px);
+            }
+
+            6% {
+                transform: translate(0, 0);
+            }
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .nav {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 0;
+            border-bottom: var(--border);
+            margin-bottom: 20px;
+        }
+
+        .nav button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav button:hover {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .nav button.active {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .main-content {
+            padding: 20px 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 500;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            padding-left: 15px;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-card h3 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+.chart {
+    max-width: 600px; /* Limit the maximum width to prevent excessive stretching */
+    width: 100%; /* Ensure it scales within the container */
+    height: auto; /* Remove fixed height to allow Chart.js to control aspect ratio */
+    margin: 20px 0;
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 15px 35px 15px 15px;
+    box-shadow: var(--shadow); /* Optional: Add shadow for consistency */
+}Task Management Web App
+A responsive web application designed to help students manage their tasks, schedules, and study materials efficiently. Built with HTML, CSS, and JavaScript, this app provides a user-friendly interface with features like task tracking, a Pomodoro timer, and a weekly progress dashboard.
+Table of Contents
+
+Features
+Demo
+Installation
+Usage
+Contributing
+License
+Contact
+
+Features
+
+Task Management: Create, edit, and delete tasks with details like deadlines, priorities, categories, subtasks, and file attachments.
+Dashboard: Visualize task progress with a bar chart showing pending, completed, and overdue tasks.
+Pomodoro Timer: Stay focused with a built-in 25-minute timer and 5-minute breaks, rewarding points for completed sessions.
+Calendar View: Organize tasks by due date for better planning.
+Study Materials: Track learning resources with progress bars and categorized storage.
+Daily Schedule: Plan your day with time-based activity scheduling.
+Notifications: Receive reminders for task deadlines and daily schedules (browser notifications).
+Dark Mode: Toggle between light and dark themes for comfortable viewing.
+Progressive Web App (PWA): Install the app on your device for offline access.
+
+Demo
+Check out the live demo here (replace with your deployed link).Alternatively, view screenshots in the /screenshots folder.
+Installation
+
+Clone the Repository:
+git clone https://github.com/your-username/your-repo-name.git
+
+
+Navigate to the Project Directory:
+cd your-repo-name
+
+
+Open the App:
+
+Open index.html in a web browser (e.g., Chrome, Firefox).
+
+Alternatively, use a local server for a better experience:
+npx http-server
+
+Then access the app at http://localhost:8080.
+
+
+
+
+Usage
+
+Add Tasks: Navigate to the "Tasks" tab, fill in the task details (title, deadline, etc.), and click "Add Task."
+Track Progress: Use the dashboard to monitor pending, completed, and overdue tasks via the bar chart.
+Stay Focused: Start the Pomodoro timer in the "Timer" tab to work in focused 25-minute sessions.
+Organize Schedule: Add daily activities in the "Schedule" tab to plan your day.
+Manage Materials: Store and track study resources in the "Materials" tab with progress tracking.
+Enable Notifications: Allow browser notifications for task reminders and schedule alerts.
+Toggle Theme: Click the theme toggle button in the header to switch between light and dark modes.
+
+Contributing
+Contributions are welcome! To contribute:
+
+Fork the repository.
+Create a new branch (git checkout -b feature/your-feature).
+Make your changes and commit (git commit -m "Add your feature").
+Push to the branch (git push origin feature/your-feature).
+Open a Pull Request.
+
+Please ensure your code follows the project's coding style and includes relevant tests.
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
+Contact
+For questions or suggestions, reach out via:
+
+GitHub: your-username
+Email: your-email@example.com
+
+
+Note: Replace placeholders (e.g., your-username, your-repo-name, your-demo-link.com, your-email@example.com) with your actual details before uploading to GitHub.
+
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .filter-section input,
+        .filter-section select {
+            padding: 12px;
+            font-size: 1.1rem;
+            border: var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .filter-section input:focus,
+        .filter-section select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .task-list>div {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .task-list>div:hover {
+            transform: translateX(3px);
+        }
+
+        .task-list h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .task-list p {
+            margin: 8px 0;
+            font-size: 1.1rem;
+        }
+
+        .task-list a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .task-list a:hover {
+            text-decoration: underline;
+        }
+
+        .task-list .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .task-list button {
+            padding: 8px 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .task-list button.complete {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .task-list button.complete:hover {
+            background: #27ae60;
+        }
+
+        .task-list button.delete {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .task-list button.delete:hover {
+            background: #c0392b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: #d1d9e0;
+            height: 6px;
+            border-radius: 3px;
+            margin: 8px 0;
+        }
+
+        .progress-bar div {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .form-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            transition: height 0.3s ease;
+        }
+
+        .form-card h3 {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .form-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-toggle button {
+            padding: 8px 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-toggle button:hover {
+            background: var(--secondary-color);
+        }
+
+        .form-content {
+            display: block;
+        }
+
+        .form-content.hidden {
+            display: none;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .form-card input,
+        .form-card textarea,
+        .form-card select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            border: var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+
+        .form-card input:focus,
+        .form-card textarea:focus,
+        .form-card select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+
+        .form-card button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-color);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .form-card button:hover {
+            background: var(--secondary-color);
+        }
+
+        .timer-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 3.5rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .timer-controls button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .timer-controls button:first-of-type {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .timer-controls button:first-of-type:hover {
+            background: #27ae60;
+        }
+
+        .timer-controls button:last-of-type {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .timer-controls button:last-of-type:hover {
+            background: #c0392b;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="header-title" data-text="Pengelola Tugas SMK">Management Task</h1>
+            <div class="header-stats">
+                <span>Level: <span id="level">1</span></span>
+                <span>Poin: <span id="points">0</span></span>
+                <button onclick="toggleTheme()" class="theme-toggle">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button onclick="showTab('dashboard')" class="active">Dashboard</button>
+            <button onclick="showTab('tasks')">Tugas</button>
+            <button onclick="showTab('calendar')">Kalender</button>
+            <button onclick="showTab('timer')">Timer</button>
+            <button onclick="showTab('materials')">Materi</button>
+            <button onclick="showTab('schedule')">Jadwal</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tab: Dashboard -->
+            <div id="dashboard" class="tab-content active">
+                <h2 class="section-title">Dashboard</h2>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3>Belum Selesai</h3>
+                        <p id="pendingTasks">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Selesai</h3>
+                        <p id="completedTasks">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Telat</h3>
+                        <p id="overdueTasks">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Minggu Ini</h3>
+                        <p id="weeklyStats">0</p>
+                    </div>
+                </div>
+
+                <canvas id="weeklyChart" class="chart" width="800" height="30"></canvas>
+
+                <div class="filter-section">
+                    <input id="searchInput" type="text" placeholder="Cari tugas..." oninput="filterTasks()">
+                    <select id="categoryFilter" onchange="filterTasks()">
+                        <option value="">Semua Kategori</option>
+                        <option value="Sekolah">Sekolah</option>
+                        <option value="Proyek Pribadi">Proyek Pribadi</option>
+                    </select>
+                    <select id="priorityFilter" onchange="filterTasks()">
+                        <option value="">Semua Prioritas</option>
+                        <option value="Tinggi">Tinggi</option>
+                        <option value="Sedang">Sedang</option>
+                        <option value="Rendah">Rendah</option>
+                    </select>
+                </div>
+                <div id="dashboardTaskList" class="task-list"></div>
+            </div>
+
+            <!-- Tab: Tugas -->
+            <div id="tasks" class="tab-content">
+                <h2 class="section-title">Kelola Tugas</h2>
+                <div class="form-card">
+                    <div class="form-toggle">
+                        <h3>Tambah Tugas</h3>
+                        <button onclick="toggleForm('taskFormContent')">Sembunyikan Form</button>
+                    </div>
+                    <div id="taskFormContent" class="form-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="taskName">Judul Tugas</label>
+                                <input id="taskName" type="text" placeholder="Masukkan judul tugas">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskDesc">Deskripsi</label>
+                                <textarea id="taskDesc" placeholder="Masukkan deskripsi tugas"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskDeadline">Tenggat Waktu</label>
+                                <input id="taskDeadline" type="datetime-local">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskCategory">Kategori</label>
+                                <select id="taskCategory">
+                                    <option value="Sekolah">Sekolah</option>
+                                    <option value="Proyek Pribadi">Proyek Pribadi</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskPriority">Prioritas</label>
+                                <select id="taskPriority">
+                                    <option value="Tinggi">Tinggi</option>
+                                    <option value="Sedang">Sedang</option>
+                                    <option value="Rendah">Rendah</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskReminder">Pengingat (jam sebelum)</label>
+                                <input id="taskReminder" type="number" placeholder="Masukkan jam">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskFile">Lampiran</label>
+                                <input id="taskFile" type="file">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskLink">Link Referensi</label>
+                                <input id="taskLink" type="url" placeholder="Masukkan link">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskNotes">Catatan Pribadi</label>
+                                <textarea id="taskNotes" placeholder="Masukkan catatan"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="subtaskInput">Subtugas</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input id="subtaskInput" type="text" placeholder="Tambah subtugas">
+                                    <button onclick="addSubtask()" style="width: auto;">Tambah</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="addTask()">Tambah Tugas</button>
+                    </div>
+                </div>
+                <div id="taskList" class="task-list"></div>
+            </div>
+
+            <!-- Tab: Kalender -->
+            <div id="calendar" class="tab-content">
+                <h2 class="section-title">Kalender Tugas</h2>
+                <div id="calendarList" class="task-list"></div>
+            </div>
+
+            <!-- Tab: Timer -->
+            <div id="timer" class="tab-content">
+                <h2 class="section-title">Timer Pomodoro</h2>
+                <div class="timer-card">
+                    <div id="timerDisplay" class="timer-display">25:00</div>
+                    <div class="timer-controls">
+                        <button onclick="startTimer()">Mulai</button>
+                        <button onclick="stopTimer()">Berhenti</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Materi -->
+            <div id="materials" class="tab-content">
+                <h2 class="section-title">Materi Belajar</h2>
+                <div class="form-card">
+                    <div class="form-toggle">
+                        <h3>Tambah Materi</h3>
+                        <button onclick="toggleForm('materialFormContent')">Sembunyikan Form</button>
+                    </div>
+                    <div id="materialFormContent" class="form-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="materialTitle">Judul Materi</label>
+                                <input id="materialTitle" type="text" placeholder="Masukkan judul materi">
+                            </div>
+                            <div class="form-group">
+                                <label for="materialDesc">Deskripsi</label>
+                                <textarea id="materialDesc" placeholder="Masukkan deskripsi materi"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="materialCategory">Kategori</label>
+                                <select id="materialCategory">
+                                    <option value="Pemrograman">Pemrograman</option>
+                                    <option value="Desain">Desain</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="materialLink">Link Sumber</label>
+                                <input id="materialLink" type="url" placeholder="Masukkan link sumber">
+                            </div>
+                            <div class="form-group">
+                                <label for="materialFile">Lampiran</label>
+                                <input id="materialFile" type="file">
+                            </div>
+                            <div class="form-group">
+                                <label for="materialProgress">Progress (%)</label>
+                                <input id="materialProgress" type="number" min="0" max="100"
+                                    placeholder="Masukkan progress">
+                            </div>
+                        </div>
+                        <button onclick="addMaterial()">Tambah Materi</button>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <select id="materialCategoryFilter" onchange="renderMaterials()">
+                        <option value="">Semua Kategori</option>
+                        <option value="Pemrograman">Pemrograman</option>
+                        <option value="Desain">Desain</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div id="materialList" class="task-list"></div>
+            </div>
+
+            <!-- Tab: Jadwal -->
+            <div id="schedule" class="tab-content">
+                <h2 class="section-title">Jadwal Harian</h2>
+                <div class="form-card">
+                    <div class="form-toggle">
+                        <h3>Tambah Jadwal</h3>
+                        <button onclick="toggleForm('scheduleFormContent')">Sembunyikan Form</button>
+                    </div>
+                    <div id="scheduleFormContent" class="form-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="scheduleTime">Waktu</label>
+                                <input id="scheduleTime" type="time">
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleActivity">Aktivitas</label>
+                                <input id="scheduleActivity" type="text" placeholder="Masukkan aktivitas">
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleDesc">Deskripsi</label>
+                                <textarea id="scheduleDesc" placeholder="Masukkan deskripsi"></textarea>
+                            </div>
+                        </div>
+                        <button onclick="addSchedule()">Tambah Jadwal</button>
+                    </div>
+                </div>
+                <div id="scheduleList" class="task-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <audio id="completeSound" src="https://www.soundjay.com/buttons/beep-01a.mp3"></audio>
+
+    <script>
+        // // PWA Service Worker Registration
+        // if ('serviceWorker' in navigator) {
+        //     navigator.serviceWorker.register('sw.js');
+        // }
+
+        // // Request Notification Permission
+        // if (Notification.permission !== 'granted') {
+        //     Notification.requestPermission();
+        // }
+
+        // // Theme Toggle
+        // function toggleTheme() {
+        //     document.body.classList.toggle('dark');
+        // }
+
+        // // Form Toggle
+        // function toggleForm(formId) {
+        //     const formContent = document.getElementById(formId);
+        //     formContent.classList.toggle('hidden');
+        //     const button = formContent.previousElementSibling.querySelector('button');
+        //     button.textContent = formContent.classList.contains('hidden') ? 'Tampilkan Form' : 'Sembunyikan Form';
+        // }
+
+        // // Task Management
+        // let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        // let materials = JSON.parse(localStorage.getItem('materials')) || [];
+        // let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+        // let points = parseInt(localStorage.getItem('points')) || 0;
+        // let level = Math.floor(points / 100) + 1;
+        // let subtasksTemp = [];
+
+        // function updateHeaderStats() {
+        //     document.getElementById('level').textContent = level;
+        //     document.getElementById('points').textContent = points;
+        // }
+
+        // function showToast(message) {
+        //     const toast = document.getElementById('toast');
+        //     toast.textContent = message;
+        //     toast.style.display = 'block';
+        //     setTimeout(() => {
+        //         toast.style.display = 'none';
+        //     }, 3000);
+        // }
+
+        // function playSound() {
+        //     const sound = document.getElementById('completeSound');
+        //     sound.play().catch(() => { });
+        // }
+
+        // function addTask() {
+        //     const name = document.getElementById('taskName').value;
+        //     const desc = document.getElementById('taskDesc').value;
+        //     const deadline = document.getElementById('taskDeadline').value;
+        //     const category = document.getElementById('taskCategory').value;
+        //     const priority = document.getElementById('taskPriority').value;
+        //     const reminder = document.getElementById('taskReminder').value;
+        //     const fileInput = document.getElementById('taskFile');
+        //     const link = document.getElementById('taskLink').value;
+        //     const notes = document.getElementById('taskNotes').value;
+
+        //     if (!name || !deadline) {
+        //         showToast('Judul dan tenggat waktu wajib diisi!');
+        //         return;
+        //     }
+
+        //     let fileData = null;
+        //     if (fileInput.files.length > 0) {
+        //         const file = fileInput.files[0];
+        //         const reader = new FileReader();
+        //         reader.onload = () => {
+        //             fileData = reader.result;
+        //             const task = {
+        //                 name, desc, deadline, category, priority, reminder: reminder ? parseInt(reminder) : 0,
+        //                 file: fileData, link, notes, subtasks: subtasksTemp, completed: false,
+        //                 completedDate: null
+        //             };
+        //             tasks.push(task);
+        //             tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        //             saveTasks();
+        //             scheduleNotifications(task);
+        //             renderTasks();
+        //             renderDashboardTasks();
+        //             renderCalendar();
+        //             clearForm();
+        //             subtasksTemp = [];
+        //             showToast('Tugas berhasil ditambahkan!');
+        //         };
+        //         reader.readAsDataURL(file);
+        //     } else {
+        //         const task = {
+        //             name, desc, deadline, category, priority, reminder: reminder ? parseInt(reminder) : 0,
+        //             file: null, link, notes, subtasks: subtasksTemp, completed: false,
+        //             completedDate: null
+        //         };
+        //         tasks.push(task);
+        //         tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        //         saveTasks();
+        //         scheduleNotifications(task);
+        //         renderTasks();
+        //         renderDashboardTasks();
+        //         renderCalendar();
+        //         clearForm();
+        //         subtasksTemp = [];
+        //         showToast('Tugas berhasil ditambahkan!');
+        //     }
+        // }
+
+        // function addSubtask() {
+        //     const subtask = document.getElementById('subtaskInput').value;
+        //     if (subtask) {
+        //         subtasksTemp.push({ name: subtask, completed: false });
+        //         document.getElementById('subtaskInput').value = '';
+        //         showToast('Subtugas ditambahkan!');
+        //     }
+        // }
+
+        // function saveTasks() {
+        //     localStorage.setItem('tasks', JSON.stringify(tasks));
+        //     localStorage.setItem('points', points);
+        //     localStorage.setItem('materials', JSON.stringify(materials));
+        //     localStorage.setItem('schedules', JSON.stringify(schedules));
+        //     level = Math.floor(points / 100) + 1;
+        //     updateHeaderStats();
+        // }
+
+        // function renderTasks() {
+        //     const taskList = document.getElementById('taskList');
+        //     taskList.innerHTML = '';
+        //     const filteredTasks = filterTasks();
+        //     filteredTasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        //     filteredTasks.forEach((task, index) => {
+        //         const overdue = new Date(task.deadline) < new Date() && !task.completed;
+        //         const completedSubtasks = task.subtasks.filter(sub => sub.completed).length;
+        //         const totalSubtasks = task.subtasks.length;
+        //         const progress = totalSubtasks ? (completedSubtasks / totalSubtasks) * 100 : 0;
+        //         const taskElement = document.createElement('div');
+        //         taskElement.innerHTML = `
+        //   <div class="flex justify-between items-start">
+        //     <div>
+        //       <h3 class="${task.completed ? 'line-through' : ''}">${task.name}</h3>
+        //       <p>${task.desc || 'Tidak ada deskripsi'}</p>
+        //       <p class="text-red-500 text-sm">Tenggat: ${task.deadline}</p>
+        //       <p>Kategori: ${task.category} | Prioritas: ${task.priority}</p>
+        //       ${task.link ? `<p><a href="${task.link}" target="_blank">Link Referensi</a></p>` : ''}
+        //       ${task.file ? `<p><a href="${task.file}" download>Unduh Lampiran</a></p>` : ''}
+        //       ${task.notes ? `<p>Catatan: ${task.notes}</p>` : ''}
+        //       <div class="progress-bar"><div style="width: ${progress}%"></div></div>
+        //       ${task.subtasks.map((sub, subIndex) => `
+        //         <div class="flex items-center mt-2">
+        //           <input type="checkbox" ${sub.completed ? 'checked' : ''} onchange="toggleSubtask(${index}, ${subIndex})">
+        //           <span class="${sub.completed ? 'line-through' : ''} ml-2">${sub.name}</span>
+        //         </div>
+        //       `).join('')}
+        //     </div>
+        //     <div class="button-group">
+        //       <button class="complete" onclick="toggleTask(${index})">
+        //         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        //         ${task.completed ? 'Batal Selesai' : 'Selesai'}
+        //       </button>
+        //       <button class="delete" onclick="deleteTask(${index})">
+        //         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        //         Hapus
+        //       </button>
+        //     </div>
+        //   </div>
+        // `;
+        //         taskList.appendChild(taskElement);
+        //     });
+        // }
+
+        // // function renderDashboardTasks() {
+        // //     const dashboardTaskList = document.getElementById('dashboardTaskList');
+        // //     dashboardTaskList.innerHTML = '';
+        // //     const filteredTasks = filterTasks();
+        // //     filteredTasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        // //     filteredTasks.forEach((task, index) => {
+        // //         const overdue = new Date(task.deadline) < new Date() && !task.completed;
+        // //         const completedSubtasks = task.subtasks.filter(sub => sub.completed).length;
+        // //         const totalSubtasks = task.subtasks.length;
+        // //         const progress = totalSubtasks ? (completedSubtasks / totalSubtasks) * 100 : 0;
+        // //         const taskElement = document.createElement('div');
+        // //         taskElement.innerHTML = `
+        // //   <div class="flex justify-between items-start">
+        // //     <div>
+        // //       <h3 class="${task.completed ? 'line-through' : ''}">${task.name}</h3>
+        // //       <p>${task.desc || 'Tidak ada deskripsi'}</p>
+        // //       <p class="text-red-500 text-sm">Tenggat: ${task.deadline}</p>
+        // //       <p>Kategori: ${task.category} | Prioritas: ${task.priority}</p>
+        // //       ${task.link ? `<p><a href="${task.link}" target="_blank">Link Referensi</a></p>` : ''}
+        // //       ${task.file ? `<p><a href="${task.file}" download>Unduh Lampiran</a></p>` : ''}
+        // //       ${task.notes ? `<p>Catatan: ${task.notes}</p>` : ''}
+        // //       <div class="progress-bar"><div style="width: ${progress}%"></div></div>
+        // //       ${task.subtasks.map((sub, subIndex) => `
+        // //         <div class="flex items-center mt-2">
+        // //           <input type="checkbox" ${sub.completed ? 'checked' : ''} onchange="toggleSubtask(${index}, ${subIndex})">
+        // //           <span class="${sub.completed ? 'line-through' : ''} ml-2">${sub.name}</span>
+        // //         </div>
+        // //       `).join('')}
+        // //     </div>
+        // //     <div class="button-group">
+        // //       <button class="complete" onclick="toggleTask(${index})">
+        // //         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        // //         ${task.completed ? 'Batal Selesai' : 'Selesai'}
+        // //       </button>
+        // //       <button class="delete" onclick="deleteTask(${index})">
+        // //         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        // //         Hapus
+        // //       </button>
+        // //     </div>
+        // //   </div>
+        // // `;
+        // //         dashboardTaskList.appendChild(taskElement);
+        // //     });
+        // // }
+        //     // Perbaiki fungsi renderDashboard() untuk chart
+        //         function renderDashboard() {
+        //             const pendingTasks = tasks.filter(task => !task.completed).length;
+        //             const completedTasks = tasks.filter(task => task.completed).length;
+        //             const overdueTasks = tasks.filter(task => new Date(task.deadline) < new Date() && !task.completed).length;
+
+        //             const now = new Date();
+        //             const startOfWeek = new Date(now);
+        //             startOfWeek.setDate(now.getDate() - now.getDay());
+        //             const weeklyCompleted = tasks.filter(task => {
+        //                 if (!task.completedDate) return false;
+        //                 const completedDate = new Date(task.completedDate);
+        //                 return completedDate >= startOfWeek && completedDate <= now;
+        //             }).length;
+
+        //             document.getElementById('pendingTasks').textContent = pendingTasks;
+        //             document.getElementById('completedTasks').textContent = completedTasks;
+        //             document.getElementById('overdueTasks').textContent = overdueTasks;
+        //             document.getElementById('weeklyStats').textContent = weeklyCompleted;
+
+        //             // Hapus chart yang sudah ada jika ada
+        //             if (window.myChart) {
+        //                 window.myChart.destroy();
+        //             }
+
+        //             const ctx = document.getElementById('weeklyChart').getContext('2d');
+        //             window.myChart = new Chart(ctx, {
+        //                 type: 'bar',
+        //                 data: {
+        //                     labels: ['Belum Selesai', 'Selesai', 'Telat'],
+        //                     datasets: [{
+        //                         label: 'Jumlah Tugas',
+        //                         data: [pendingTasks, completedTasks, overdueTasks],
+        //                         backgroundColor: ['#4a90e2', '#2ecc71', '#e74c3c'],
+        //                     }]
+        //                 },
+        //                 options: {
+        //                     responsive: true,
+        //                     maintainAspectRatio: false,
+        //                     scales: {
+        //                         y: {
+        //                             beginAtZero: true,
+        //                             ticks: {
+        //                                 precision: 0
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             });
+
+        //             renderDashboardTasks();
+        //         }
+
+
+        // function clearForm() {
+        //     document.getElementById('taskName').value = '';
+        //     document.getElementById('taskDesc').value = '';
+        //     document.getElementById('taskDeadline').value = '';
+        //     document.getElementById('taskReminder').value = '';
+        //     document.getElementById('taskFile').value = '';
+        //     document.getElementById('taskLink').value = '';
+        //     document.getElementById('taskNotes').value = '';
+        //     document.getElementById('subtaskInput').value = '';
+        // }
+
+        // function toggleTask(index) {
+        //     tasks[index].completed = !tasks[index].completed;
+        //     if (tasks[index].completed) {
+        //         tasks[index].completedDate = new Date().toISOString();
+        //         points += 10;
+        //         playSound();
+        //         showToast('Selamat! Tugas selesai! +10 poin');
+        //     } else {
+        //         tasks[index].completedDate = null;
+        //         points -= 10;
+        //     }
+        //     saveTasks();
+        //     renderTasks();
+        //     renderDashboardTasks();
+        //     renderDashboard();
+        // }
+
+        // function toggleSubtask(taskIndex, subIndex) {
+        //     tasks[taskIndex].subtasks[subIndex].completed = !tasks[taskIndex].subtasks[subIndex].completed;
+        //     if (tasks[taskIndex].subtasks[subIndex].completed) {
+        //         points += 5;
+        //         playSound();
+        //         showToast('Subtugas selesai! +5 poin');
+        //     } else {
+        //         points -= 5;
+        //     }
+        //     saveTasks();
+        //     renderTasks();
+        //     renderDashboardTasks();
+        //     renderDashboard();
+        // }
+
+        // function deleteTask(index) {
+        //     tasks.splice(index, 1);
+        //     saveTasks();
+        //     renderTasks();
+        //     renderDashboardTasks();
+        //     renderCalendar();
+        //     renderDashboard();
+        //     showToast('Tugas dihapus!');
+        // }
+
+        // // Filter & Search
+        // function filterTasks() {
+        //     const search = document.getElementById('searchInput').value.toLowerCase();
+        //     const category = document.getElementById('categoryFilter').value;
+        //     const priority = document.getElementById('priorityFilter').value;
+
+        //     const filteredTasks = tasks.filter(task => {
+        //         const matchesSearch = task.name.toLowerCase().includes(search);
+        //         const matchesCategory = category ? task.category === category : true;
+        //         const matchesPriority = priority ? task.priority === priority : true;
+        //         return matchesSearch && matchesCategory && matchesPriority;
+        //     });
+
+        //     renderTasks();
+        //     renderDashboardTasks();
+        //     return filteredTasks;
+        // }
+
+        // // Calendar View
+        // function renderCalendar() {
+        //     const calendarList = document.getElementById('calendarList');
+        //     calendarList.innerHTML = '';
+        //     tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        //     tasks.forEach(task => {
+        //         const taskElement = document.createElement('div');
+        //         taskElement.innerHTML = `
+        //   <p class="text-red-500 text-sm">Tenggat: ${task.deadline}</p>
+        //   <p class="font-semibold">${task.name}</p>
+        //   <p>${task.desc || 'Tidak ada deskripsi'}</p>
+        // `;
+        //         calendarList.appendChild(taskElement);
+        //     });
+        // }
+
+        // // Dashboard
+        // function renderDashboard() {
+        //     const pendingTasks = tasks.filter(task => !task.completed).length;
+        //     const completedTasks = tasks.filter(task => task.completed).length;
+        //     const overdueTasks = tasks.filter(task => new Date(task.deadline) < new Date() && !task.completed).length;
+
+        //     const now = new Date();
+        //     const startOfWeek = new Date(now);
+        //     startOfWeek.setDate(now.getDate() - now.getDay());
+        //     const weeklyCompleted = tasks.filter(task => {
+        //         if (!task.completedDate) return false;
+        //         const completedDate = new Date(task.completedDate);
+        //         return completedDate >= startOfWeek && completedDate <= now;
+        //     }).length;
+
+        //     document.getElementById('pendingTasks').textContent = pendingTasks;
+        //     document.getElementById('completedTasks').textContent = completedTasks;
+        //     document.getElementById('overdueTasks').textContent = overdueTasks;
+        //     document.getElementById('weeklyStats').textContent = weeklyCompleted;
+
+        //     const ctx = document.getElementById('weeklyChart').getContext('2d');
+        //     new Chart(ctx, {
+        //         type: 'bar',
+        //         data: {
+        //             labels: ['Belum Selesai', 'Selesai', 'Telat'],
+        //             datasets: [{
+        //                 label: 'Jumlah Tugas',
+        //                 data: [pendingTasks, completedTasks, overdueTasks],
+        //                 backgroundColor: ['#4a90e2', '#2ecc71', '#e74c3c'],
+        //             }]
+        //         },
+        //         options: {
+        //             scales: {
+        //                 y: { beginAtZero: true }
+        //             }
+        //         }
+        //     });
+
+        //     renderDashboardTasks();
+        // }
+
+        // // Notifications
+        // function scheduleNotifications(task) {
+        //     if (task.reminder && Notification.permission === 'granted') {
+        //         const deadline = new Date(task.deadline);
+        //         const reminderTime = new Date(deadline.getTime() - task.reminder * 60 * 60 * 1000);
+        //         const now = new Date();
+
+        //         if (reminderTime > now) {
+        //             const delay = reminderTime - now;
+        //             setTimeout(() => {
+        //                 new Notification(`Pengingat: ${task.name}`, {
+        //                     body: `Tugas "${task.name}" akan berakhir pada ${task.deadline}!`,
+        //                 });
+        //             }, delay);
+        //         }
+        //     }
+        // }
+
+        // // Pomodoro Timer
+        // let timerInterval;
+        // let timeLeft = 25 * 60;
+
+        // function startTimer() {
+        //     if (!timerInterval) {
+        //         timerInterval = setInterval(() => {
+        //             if (timeLeft > 0) {
+        //                 timeLeft--;
+        //                 updateTimerDisplay();
+        //             } else {
+        //                 clearInterval(timerInterval);
+        //                 timerInterval = null;
+        //                 playSound();
+        //                 showToast('Sesi Pomodoro selesai! Istirahat 5 menit.');
+        //                 timeLeft = 5 * 60;
+        //                 startTimer();
+        //             }
+        //         }, 1000);
+        //     }
+        // }
+
+        // function stopTimer() {
+        //     clearInterval(timerInterval);
+        //     timerInterval = null;
+        //     timeLeft = 25 * 60;
+        //     updateTimerDisplay();
+        //     showToast('Timer dihentikan.');
+        // }
+
+        // function updateTimerDisplay() {
+        //     const minutes = Math.floor(timeLeft / 60);
+        //     const seconds = timeLeft % 60;
+        //     document.getElementById('timerDisplay').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        // }
+
+
+        // PWA Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.error('Service worker registration failed:', err);
+                });
+            }
+
+            // Request Notification Permission
+            if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+
+            // Theme Toggle
+            function toggleTheme() {
+                document.body.classList.toggle('dark');
+                // Simpan preferensi tema
+                const isDarkMode = document.body.classList.contains('dark');
+                localStorage.setItem('darkMode', isDarkMode);
+
+                // Re-render charts untuk menerapkan tema
+                renderDashboard();
+            }
+
+            // Load tema yang tersimpan
+            function loadSavedTheme() {
+                const isDarkMode = localStorage.getItem('darkMode') === 'true';
+                if (isDarkMode) {
+                    document.body.classList.add('dark');
+                }
+            }
+
+            // Form Toggle
+            function toggleForm(formId) {
+                const formContent = document.getElementById(formId);
+                if (formContent) {
+                    formContent.classList.toggle('hidden');
+                    const button = formContent.previousElementSibling.querySelector('button');
+                    if (button) {
+                        button.textContent = formContent.classList.contains('hidden') ? 'Tampilkan Form' : 'Sembunyikan Form';
+                    }
+                }
+            }
+
+            // Task Management
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            let materials = JSON.parse(localStorage.getItem('materials')) || [];
+            let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+            let points = parseInt(localStorage.getItem('points')) || 0;
+            let level = Math.floor(points / 100) + 1;
+            let subtasksTemp = [];
+
+            function updateHeaderStats() {
+                document.getElementById('level').textContent = level;
+                document.getElementById('points').textContent = points;
+            }
+
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    toast.textContent = message;
+                    toast.style.display = 'block';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 3000);
+                }
+            }
+
+            function playSound() {
+                const sound = document.getElementById('completeSound');
+                if (sound) {
+                    sound.play().catch(err => {
+                        console.log('Error playing sound:', err.message);
+                    });
+                }
+            }
+
+            function addTask() {
+                const name = document.getElementById('taskName').value;
+                const desc = document.getElementById('taskDesc').value;
+                const deadline = document.getElementById('taskDeadline').value;
+                const category = document.getElementById('taskCategory').value;
+                const priority = document.getElementById('taskPriority').value;
+                const reminder = document.getElementById('taskReminder').value;
+                const fileInput = document.getElementById('taskFile');
+                const link = document.getElementById('taskLink').value;
+                const notes = document.getElementById('taskNotes').value;
+
+                if (!name || !deadline) {
+                    showToast('Judul dan tenggat waktu wajib diisi!');
+                    return;
+                }
+
+                // Cek apakah ada file
+                if (fileInput && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const fileData = e.target.result;
+                        addTaskWithFile(name, desc, deadline, category, priority, reminder, fileData, link, notes);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    addTaskWithFile(name, desc, deadline, category, priority, reminder, null, link, notes);
+                }
+            }
+
+            function addTaskWithFile(name, desc, deadline, category, priority, reminder, fileData, link, notes) {
+                const task = {
+                    id: Date.now().toString(), // Menambahkan ID unik
+                    name,
+                    desc,
+                    deadline,
+                    category,
+                    priority,
+                    reminder: reminder ? parseInt(reminder) : 0,
+                    file: fileData,
+                    link,
+                    notes,
+                    subtasks: subtasksTemp.slice(), // Gunakan copy dari array
+                    completed: false,
+                    completedDate: null
+                };
+
+                tasks.push(task);
+                tasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+                saveTasks();
+                scheduleNotifications(task);
+                renderTasks();
+                renderDashboardTasks();
+                renderCalendar();
+                renderDashboard();
+                clearForm();
+                subtasksTemp = [];
+                showToast('Tugas berhasil ditambahkan!');
+            }
+
+            function addSubtask() {
+                const subtask = document.getElementById('subtaskInput').value;
+                if (subtask) {
+                    subtasksTemp.push({ name: subtask, completed: false });
+                    document.getElementById('subtaskInput').value = '';
+                    showToast('Subtugas ditambahkan!');
+                }
+            }
+
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('points', points);
+                localStorage.setItem('materials', JSON.stringify(materials));
+                localStorage.setItem('schedules', JSON.stringify(schedules));
+                level = Math.floor(points / 100) + 1;
+                updateHeaderStats();
+            }
+
+            function renderTasks() {
+                const taskList = document.getElementById('taskList');
+                if (!taskList) return;
+
+                taskList.innerHTML = '';
+                const filteredTasks = filterTasks();
+                filteredTasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+                filteredTasks.forEach((task, index) => {
+                    const taskIndex = tasks.findIndex(t => t.id === task.id);
+                    const overdue = new Date(task.deadline) < new Date() && !task.completed;
+                    const completedSubtasks = task.subtasks.filter(sub => sub.completed).length;
+                    const totalSubtasks = task.subtasks.length;
+                    const progress = totalSubtasks ? (completedSubtasks / totalSubtasks) * 100 : 0;
+
+                    const taskElement = document.createElement('div');
+                    taskElement.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="${task.completed ? 'line-through' : ''}">${task.name}</h3>
+            <p>${task.desc || 'Tidak ada deskripsi'}</p>
+            <p class="text-red-500 text-sm">Tenggat: ${formatDate(task.deadline)}</p>
+            <p>Kategori: ${task.category} | Prioritas: ${task.priority}</p>
+            ${task.link ? `<p><a href="${task.link}" target="_blank">Link Referensi</a></p>` : ''}
+            ${task.file ? `<p><a href="${task.file}" download>Unduh Lampiran</a></p>` : ''}
+            ${task.notes ? `<p>Catatan: ${task.notes}</p>` : ''}
+            <div class="progress-bar"><div style="width: ${progress}%"></div></div>
+            ${task.subtasks.map((sub, subIndex) => `
+              <div class="flex items-center mt-2">
+                <input type="checkbox" ${sub.completed ? 'checked' : ''} onchange="toggleSubtask(${taskIndex}, ${subIndex})">
+                <span class="${sub.completed ? 'line-through' : ''} ml-2">${sub.name}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="button-group">
+            <button class="complete" onclick="toggleTask(${taskIndex})">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              ${task.completed ? 'Batal Selesai' : 'Selesai'}
+            </button>
+            <button class="delete" onclick="deleteTask(${taskIndex})">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Hapus
+            </button>
+          </div>
+        </div>
+      `;
+                    taskList.appendChild(taskElement);
+                });
+            }
+
+            function formatDate(dateStr) {
+                try {
+                    const date = new Date(dateStr);
+                    if (isNaN(date.getTime())) return dateStr;
+
+                    return date.toLocaleString('id-ID', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } catch (e) {
+                    return dateStr;
+                }
+            }
+
+            function renderDashboardTasks() {
+                const dashboardTaskList = document.getElementById('dashboardTaskList');
+                if (!dashboardTaskList) return;
+
+                dashboardTaskList.innerHTML = '';
+                const filteredTasks = filterTasks();
+                filteredTasks.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+                // Ambil hanya 5 tugas terbaru untuk dashboard
+                const recentTasks = filteredTasks.slice(0, 5);
+
+                recentTasks.forEach((task, index) => {
+                    const taskIndex = tasks.findIndex(t => t.id === task.id);
+                    const overdue = new Date(task.deadline) < new Date() && !task.completed;
+                    const completedSubtasks = task.subtasks.filter(sub => sub.completed).length;
+                    const totalSubtasks = task.subtasks.length;
+                    const progress = totalSubtasks ? (completedSubtasks / totalSubtasks) * 100 : 0;
+
+                    const taskElement = document.createElement('div');
+                    taskElement.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="${task.completed ? 'line-through' : ''}">${task.name}</h3>
+            <p>${task.desc || 'Tidak ada deskripsi'}</p>
+            <p class="text-red-500 text-sm">Tenggat: ${formatDate(task.deadline)}</p>
+            <p>Kategori: ${task.category} | Prioritas: ${task.priority}</p>
+            <div class="progress-bar"><div style="width: ${progress}%"></div></div>
+          </div>
+          <div class="button-group">
+            <button class="complete" onclick="toggleTask(${taskIndex})">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              ${task.completed ? 'Batal Selesai' : 'Selesai'}
+            </button>
+            <button class="delete" onclick="deleteTask(${taskIndex})">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Hapus
+            </button>
+          </div>
+        </div>
+      `;
+                    dashboardTaskList.appendChild(taskElement);
+                });
+            }
+
+            function clearForm() {
+                const formElements = [
+                    'taskName', 'taskDesc', 'taskDeadline', 'taskReminder',
+                    'taskFile', 'taskLink', 'taskNotes', 'subtaskInput'
+                ];
+
+                formElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.value = '';
+                });
+            }
+
+            function toggleTask(index) {
+                if (index >= 0 && index < tasks.length) {
+                    tasks[index].completed = !tasks[index].completed;
+                    if (tasks[index].completed) {
+                        tasks[index].completedDate = new Date().toISOString();
+                        points += 10;
+                        playSound();
+                        showToast('Selamat! Tugas selesai! +10 poin');
+                    } else {
+                        tasks[index].completedDate = null;
+                        points = Math.max(0, points - 10); // Pastikan poin tidak negatif
+                    }
+                    saveTasks();
+                    renderTasks();
+                    renderDashboardTasks();
+                    renderDashboard();
+                }
+            }
+
+            function toggleSubtask(taskIndex, subIndex) {
+                if (taskIndex >= 0 && taskIndex < tasks.length &&
+                    subIndex >= 0 && subIndex < tasks[taskIndex].subtasks.length) {
+
+                    tasks[taskIndex].subtasks[subIndex].completed = !tasks[taskIndex].subtasks[subIndex].completed;
+
+                    if (tasks[taskIndex].subtasks[subIndex].completed) {
+                        points += 5;
+                        playSound();
+                        showToast('Subtugas selesai! +5 poin');
+                    } else {
+                        points = Math.max(0, points - 5); // Pastikan poin tidak negatif
+                    }
+
+                    saveTasks();
+                    renderTasks();
+                    renderDashboardTasks();
+                    renderDashboard();
+                }
+            }
+
+            function deleteTask(index) {
+                if (index >= 0 && index < tasks.length) {
+                    tasks.splice(index, 1);
+                    saveTasks();
+                    renderTasks();
+                    renderDashboardTasks();
+                    renderCalendar();
+                    renderDashboard();
+                    showToast('Tugas dihapus!');
+                }
+            }
+
+            // Filter & Search
+            function filterTasks() {
+                const search = document.getElementById('searchInput')?.value?.toLowerCase() || '';
+                const category = document.getElementById('categoryFilter')?.value || '';
+                const priority = document.getElementById('priorityFilter')?.value || '';
+
+                const filteredTasks = tasks.filter(task => {
+                    const matchesSearch = task.name.toLowerCase().includes(search);
+                    const matchesCategory = category ? task.category === category : true;
+                    const matchesPriority = priority ? task.priority === priority : true;
+                    return matchesSearch && matchesCategory && matchesPriority;
+                });
+
+                return filteredTasks;
+            }
+
+            // Calendar View
+            function renderCalendar() {
+                const calendarList = document.getElementById('calendarList');
+                if (!calendarList) return;
+
+                calendarList.innerHTML = '';
+
+                // Grup tugas berdasarkan tanggal
+                const tasksByDate = {};
+                tasks.forEach(task => {
+                    const date = task.deadline.split('T')[0]; // Ambil tanggal saja
+                    if (!tasksByDate[date]) {
+                        tasksByDate[date] = [];
+                    }
+                    tasksByDate[date].push(task);
+                });
+
+                // Urutkan tanggal
+                const sortedDates = Object.keys(tasksByDate).sort();
+
+                sortedDates.forEach(date => {
+                    const dateHeader = document.createElement('h3');
+                    dateHeader.style.marginTop = '20px';
+                    dateHeader.style.borderBottom = '1px solid var(--border)';
+                    dateHeader.style.paddingBottom = '5px';
+
+                    const dateObj = new Date(date);
+                    dateHeader.textContent = dateObj.toLocaleDateString('id-ID', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+
+                    calendarList.appendChild(dateHeader);
+
+                    tasksByDate[date].forEach(task => {
+                        const taskElement = document.createElement('div');
+                        taskElement.style.marginLeft = '15px';
+                        taskElement.style.borderLeft = '3px solid var(--primary-color)';
+                        taskElement.style.paddingLeft = '15px';
+                        taskElement.style.marginBottom = '10px';
+
+                        taskElement.innerHTML = `
+                <p class="font-semibold ${task.completed ? 'line-through' : ''}">${task.name}</p>
+                <p>${task.desc || 'Tidak ada deskripsi'}</p>
+                <p class="text-red-500 text-sm">Waktu: ${task.deadline.split('T')[1] || ''}</p>
+                <p>Kategori: ${task.category} | Prioritas: ${task.priority}</p>
+            `;
+                        calendarList.appendChild(taskElement);
+                    });
+                });
+            }
+
+            // Dashboard
+          function renderDashboard() {
+                const pendingTasks = tasks.filter(task => !task.completed).length;
+                const completedTasks = tasks.filter(task => task.completed).length;
+                const overdueTasks = tasks.filter(task => new Date(task.deadline) < new Date() && !task.completed).length;
+
+                const now = new Date();
+                const startOfWeek = new Date(now);
+                startOfWeek.setDate(now.getDate() - now.getDay());
+                const weeklyCompleted = tasks.filter(task => {
+                    if (!task.completedDate) return false;
+                    const completedDate = new Date(task.completedDate);
+                    return completedDate >= startOfWeek && completedDate <= now;
+                }).length;
+
+                // Update dashboard stats
+                const elements = {
+                    'pendingTasks': pendingTasks,
+                    'completedTasks': completedTasks,
+                    'overdueTasks': overdueTasks,
+                    'weeklyStats': weeklyCompleted
+                };
+
+                Object.entries(elements).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = value;
+                });
+
+                // Destroy existing chart if it exists
+                if (window.myChart) {
+                    window.myChart.destroy();
+                }
+
+                const ctx = document.getElementById('weeklyChart')?.getContext('2d');
+                if (ctx) {
+                    window.myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Belum Selesai', 'Selesai', 'Telat'],
+                            datasets: [{
+                                label: 'Jumlah Tugas',
+                                data: [pendingTasks, completedTasks, overdueTasks],
+                                backgroundColor: ['#4a90e2', '#2ecc71', '#e74c3c'],
+                                borderColor: ['#4a90e2', '#2ecc71', '#e74c3c'],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true, // Re-enable to respect canvas aspect ratio
+                            aspectRatio: 2, // Set a 2:1 width-to-height ratio for a balanced look
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0,
+                                        stepSize: 1 // Ensure whole numbers for task counts
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Jumlah Tugas'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Status Tugas'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    enabled: true
+                                }
+                            }
+                        }
+                    });
+                }
+
+                renderDashboardTasks();
+            }
+
+            // Notifications
+            function scheduleNotifications(task) {
+                if (!task || !task.reminder || Notification.permission !== 'granted') return;
+
+                try {
+                    const deadline = new Date(task.deadline);
+                    if (isNaN(deadline.getTime())) return;
+
+                    const reminderTime = new Date(deadline.getTime() - task.reminder * 60 * 60 * 1000);
+                    const now = new Date();
+
+                    if (reminderTime > now) {
+                        const delay = reminderTime - now;
+                        setTimeout(() => {
+                            new Notification(`Pengingat: ${task.name}`, {
+                                body: `Tugas "${task.name}" akan berakhir pada ${formatDate(task.deadline)}!`,
+                                icon: '/icon.png'
+                            });
+                        }, delay);
+                    }
+                } catch (e) {
+                    console.error('Error scheduling notification:', e);
+                }
+            }
+
+            // Pomodoro Timer
+            let timerInterval;
+            let timeLeft = 25 * 60;
+            let isBreak = false;
+
+            function startTimer() {
+                if (!timerInterval) {
+                    timerInterval = setInterval(() => {
+                        if (timeLeft > 0) {
+                            timeLeft--;
+                            updateTimerDisplay();
+                        } else {
+                            clearInterval(timerInterval);
+                            timerInterval = null;
+                            playSound();
+
+                            if (isBreak) {
+                                isBreak = false;
+                                timeLeft = 25 * 60;
+                                showToast('Istirahat selesai! Kembali fokus!');
+                            } else {
+                                isBreak = true;
+                                timeLeft = 5 * 60;
+                                points += 15; // Tambah poin saat menyelesaikan sesi
+                                saveTasks();
+                                showToast('Sesi Pomodoro selesai! Istirahat 5 menit. +15 poin');
+                            }
+
+                            updateTimerDisplay();
+                        }
+                    }, 1000);
+                }
+            }
+
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+
+                // Kembali ke mode fokus
+                isBreak = false;
+                timeLeft = 25 * 60;
+                updateTimerDisplay();
+                showToast('Timer dihentikan.');
+            }
+
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                const display = document.getElementById('timerDisplay');
+                if (display) {
+                    display.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                    // Update warna berdasarkan mode
+                    display.style.color = isBreak ? '#e74c3c' : '#4a90e2';
+                }
+            }
+
+        // Materi Belajar
+        function addMaterial() {
+            const title = document.getElementById('materialTitle').value;
+            const desc = document.getElementById('materialDesc').value;
+            const category = document.getElementById('materialCategory').value;
+            const link = document.getElementById('materialLink').value;
+            const fileInput = document.getElementById('materialFile');
+            const progress = document.getElementById('materialProgress').value;
+
+            if (!title) {
+                showToast('Judul materi wajib diisi!');
+                return;
+            }
+
+            let fileData = null;
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = () => {
+                    fileData = reader.result;
+                    const material = { title, desc, category, link, file: fileData, progress: parseInt(progress) || 0 };
+                    materials.push(material);
+                    materials.sort((a, b) => a.progress - b.progress);
+                    saveTasks();
+                    renderMaterials();
+                    clearMaterialForm();
+                    showToast('Materi berhasil ditambahkan!');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                const material = { title, desc, category, link, file: null, progress: parseInt(progress) || 0 };
+                materials.push(material);
+                materials.sort((a, b) => a.progress - b.progress);
+                saveTasks();
+                renderMaterials();
+                clearMaterialForm();
+                showToast('Materi berhasil ditambahkan!');
+            }
+        }
+
+        function clearMaterialForm() {
+            document.getElementById('materialTitle').value = '';
+            document.getElementById('materialDesc').value = '';
+            document.getElementById('materialLink').value = '';
+            document.getElementById('materialFile').value = '';
+            document.getElementById('materialProgress').value = '';
+        }
+
+        function renderMaterials() {
+            const materialList = document.getElementById('materialList');
+            materialList.innerHTML = '';
+            const categoryFilter = document.getElementById('materialCategoryFilter').value;
+            let filteredMaterials = categoryFilter ? materials.filter(m => m.category === categoryFilter) : materials;
+            filteredMaterials.sort((a, b) => a.progress - b.progress);
+            filteredMaterials.forEach((material, index) => {
+                const materialElement = document.createElement('div');
+                materialElement.innerHTML = `
+          <h3>${material.title}</h3>
+          <p>${material.desc || 'Tidak ada deskripsi'}</p>
+          <p>Kategori: ${material.category}</p>
+          ${material.link ? `<p><a href="${material.link}" target="_blank">Link Sumber</a></p>` : ''}
+          ${material.file ? `<p><a href="${material.file}" download>Unduh File</a></p>` : ''}
+          <div class="progress-bar"><div style="width: ${material.progress}%"></div></div>
+          <p class="text-sm">Progress: ${material.progress}%</p>
+          <div class="button-group">
+            <button class="delete" onclick="deleteMaterial(${index})">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Hapus
+            </button>
+          </div>
+        `;
+                materialList.appendChild(materialElement);
+            });
+        }
+
+        function deleteMaterial(index) {
+            materials.splice(index, 1);
+            saveTasks();
+            renderMaterials();
+            showToast('Materi dihapus!');
+        }
+
+        // Jadwal Harian
+        function addSchedule() {
+            const time = document.getElementById('scheduleTime').value;
+            const activity = document.getElementById('scheduleActivity').value;
+            const desc = document.getElementById('scheduleDesc').value;
+
+            if (!time || !activity) {
+                showToast('Waktu dan aktivitas wajib diisi!');
+                return;
+            }
+
+            const schedule = { time, activity, desc };
+            schedules.push(schedule);
+            schedules.sort((a, b) => a.time.localeCompare(b.time));
+            saveTasks();
+            renderSchedule();
+            scheduleDailyNotifications(schedule);
+            document.getElementById('scheduleTime').value = '';
+            document.getElementById('scheduleActivity').value = '';
+            document.getElementById('scheduleDesc').value = '';
+            showToast('Jadwal berhasil ditambahkan!');
+        }
+
+        function renderSchedule() {
+            const scheduleList = document.getElementById('scheduleList');
+            scheduleList.innerHTML = '';
+            schedules.forEach((schedule, index) => {
+                const scheduleElement = document.createElement('div');
+                scheduleElement.innerHTML = `
+          <p class="text-blue-600 text-sm">Waktu: ${schedule.time}</p>
+          <p class="font-semibold">${schedule.activity}</p>
+          <p>${schedule.desc || 'Tidak ada deskripsi'}</p>
+          <div class="button-group">
+            <button class="delete" onclick="deleteSchedule(${index})">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Hapus
+            </button>
+          </div>
+        `;
+                scheduleList.appendChild(scheduleElement);
+            });
+        }
+
+        function scheduleDailyNotifications(schedule) {
+            if (Notification.permission === 'granted') {
+                const now = new Date();
+                const [hours, minutes] = schedule.time.split(':');
+                const scheduleTime = new Date();
+                scheduleTime.setHours(hours, minutes, 0, 0);
+                if (scheduleTime > now) {
+                    const delay = scheduleTime - now;
+                    setTimeout(() => {
+                        new Notification(`Pengingat Jadwal: ${schedule.activity}`, {
+                            body: `Waktunya untuk "${schedule.activity}"!`,
+                        });
+                        setInterval(() => {
+                            new Notification(`Pengingat Jadwal: ${schedule.activity}`, {
+                                body: `Waktunya untuk "${schedule.activity}"!`,
+                            });
+                        }, 24 * 60 * 60 * 1000);
+                    }, delay);
+                }
+            }
+        }
+
+        function deleteSchedule(index) {
+            schedules.splice(index, 1);
+            saveTasks();
+            renderSchedule();
+            showToast('Jadwal dihapus!');
+        }
+
+        // Tab Navigation
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.nav button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // Initial Render
+        updateHeaderStats();
+        renderTasks();
+        renderDashboardTasks();
+        renderCalendar();
+        renderDashboard();
+        renderMaterials();
+        renderSchedule();
+    </script>
+</body>
+
+</html>
