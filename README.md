@@ -1,42 +1,88 @@
-#Task Management Web App#
-A responsive web application designed to help students manage their tasks, schedules, and study materials efficiently. Built with HTML, CSS, and JavaScript, this app provides a user-friendly interface with features like task tracking, a Pomodoro timer, and a weekly progress dashboard.
-Table of Contents
 
-#Features#
--Task Management: Create, edit, and delete tasks with details like deadlines, priorities, categories, subtasks, and file attachments.
--Dashboard: Visualize task progress with a bar chart showing pending, completed, and overdue tasks.
--Pomodoro Timer: Stay focused with a built-in 25-minute timer and 5-minute breaks, rewarding points for completed sessions.
--Calendar View: Organize tasks by due date for better planning.
--Study Materials: Track learning resources with progress bars and categorized storage.
--Daily Schedule: Plan your day with time-based activity scheduling.
--Notifications: Receive reminders for task deadlines and daily schedules (browser notifications).
--Dark Mode: Toggle between light and dark themes for comfortable viewing.
--Progressive Web App (PWA): Install the app on your device for offline access.
+# 📚 Task Management Web App
 
-#Usage#
--Add Tasks: Navigate to the "Tasks" tab, fill in the task details (title, deadline, etc.), and click "Add Task."
-Track Progress: Use the dashboard to monitor pending, completed, and overdue tasks via the bar chart.
-Stay Focused: Start the Pomodoro timer in the "Timer" tab to work in focused 25-minute sessions.
--Organize Schedule: Add daily activities in the "Schedule" tab to plan your day.
--Manage Materials: Store and track study resources in the "Materials" tab with progress tracking.
-Enable Notifications: Allow browser notifications for task reminders and schedule alerts.
+A **responsive web application** designed to help students efficiently manage their tasks, schedules, and study materials. Built using **HTML**, **CSS**, and **JavaScript**, this app features a clean, user-friendly interface with essential productivity tools like task tracking, a Pomodoro timer, and a weekly progress dashboard.
 
-#Contributing#
+---
+
+## 📌 Table of Contents
+
+- [Features](#features)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+---
+
+## ✅ Features
+
+- **Task Management**: Create, edit, and delete tasks with details such as deadlines, priorities, categories, subtasks, and file attachments.
+- **Dashboard**: Visualize your productivity with a bar chart showing pending, completed, and overdue tasks.
+- **Pomodoro Timer**: Boost focus with a 25-minute Pomodoro timer and 5-minute breaks. Earn points for each completed session.
+- **Calendar View**: Organize and view tasks by due date for better planning.
+- **Study Materials**: Manage learning resources with categorized storage and progress bars.
+- **Daily Schedule**: Plan your daily activities with a timeline-based schedule.
+- **Notifications**: Get browser-based reminders for upcoming deadlines and daily schedules.
+- **Dark Mode**: Switch between light and dark themes for eye comfort.
+- **Progressive Web App (PWA)**: Install the app on your device for offline access and mobile-friendly use.
+
+---
+
+## 🚀 Usage
+
+1. **Add Tasks**  
+   Navigate to the **"Tasks"** tab, enter task details (title, deadline, etc.), then click **"Add Task"**.
+
+2. **Track Progress**  
+   Use the **Dashboard** to monitor pending, completed, and overdue tasks using a bar chart.
+
+3. **Stay Focused**  
+   Start the **Pomodoro Timer** in the **"Timer"** tab to work in 25-minute sessions with scheduled breaks.
+
+4. **Organize Schedule**  
+   Plan your daily routines in the **"Schedule"** tab with time-blocked activities.
+
+5. **Manage Materials**  
+   Add and track study resources in the **"Materials"** tab with visual progress tracking.
+
+6. **Enable Notifications**  
+   Allow browser notifications to receive alerts for task deadlines and scheduled activities.
+
+---
+
+## 🤝 Contributing
+
 Contributions are welcome! To contribute:
 
-##Fork the repository.##
-Create a new branch (git checkout -b feature/your-feature).
-Make your changes and commit (git commit -m "Add your feature").
-Push to the branch (git push origin feature/your-feature).
-Open a Pull Request.
+1. **Fork** the repository  
+2. Create a new branch:  
+   ```bash
+   git checkout -b feature/your-feature
+   ```
+3. Make your changes and commit:  
+   ```bash
+   git commit -m "Add your feature"
+   ```
+4. Push to the branch:  
+   ```bash
+   git push origin feature/your-feature
+   ```
+5. Open a **Pull Request**
 
-Please ensure your code follows the project's coding style and includes relevant tests.
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
-Contact
-For questions or suggestions, reach out via:
+Please ensure your code follows the project's coding style and includes relevant tests where necessary.
 
-GitHub: yeni27-tech
-Email: yenifaturohmmahlearn@gmail.com
+---
 
+## 📄 License
 
+This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for more details.
+
+---
+
+## 📬 Contact
+
+For questions, feedback, or suggestions:
+
+- **GitHub**: [@yeni27-tech](https://github.com/yeni27-tech)  
+- **Email**: yenifaturohmmahlearn@gmail.com
